@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,7 +24,17 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.trisula.lbs_kursus.KonekDB;
 import com.trisula.lbs_kursus.R;
+import com.trisula.lbs_kursus.RequestHandler;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MapsActivity extends FragmentActivity{
 
@@ -33,6 +44,7 @@ public class MapsActivity extends FragmentActivity{
     Location location;
     LocationManager locationManager;
     ProgressDialog loading;
+    String JSON_STRING;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,25 +59,69 @@ public class MapsActivity extends FragmentActivity{
 
         }
         location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
-        Location_based_service();
+        getJSON();
     }
 
 
-    void Location_based_service(){
+    private void getJSON(){
+        class GetJSON extends AsyncTask<Void,Void,String> {
+
+            ProgressDialog loading;
+            @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loading = ProgressDialog.show(MapsActivity.this,"Mengambil Data","Mohon Tunggu...",false,false);
+            }
+
+            @Override
+            protected void onPostExecute(String s) {
+                super.onPostExecute(s);
+                loading.dismiss();
+                JSON_STRING = s;
+                showMarker(s);
+            }
+
+            @Override
+            protected String doInBackground(Void... params) {
+                RequestHandler rh = new RequestHandler();
+                String s = rh.sendGetRequest(KonekDB.API_LOKASI);
+                return s;
+            }
+        }
+        GetJSON gj = new GetJSON();
+        gj.execute();
+    }
+
+
+    void showMarker(String json){
+        JSONObject jsonObject = null;
+        ArrayList<HashMap<String, String>> list = new ArrayList<HashMap<String, String>>();
+        try {
+            jsonObject = new JSONObject(json);
+            JSONArray result = jsonObject.getJSONArray("result");
+
+            for (int i = 0; i < result.length(); i++) {
+                JSONObject jo = result.getJSONObject(i);
+                String nama_lembaga = jo.getString("nama_lembaga");
+                String alamat = jo.getString("alamat");
+                Double lati = jo.getDouble("kor_lati");
+                Double longi = jo.getDouble("kor_longi");
+
+                Location_based_service(nama_lembaga,alamat,lati,longi);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplication(),"Data Salah "+e,Toast.LENGTH_LONG).show();
+        }
+    }
+
+
+    void Location_based_service(final String Nama_lembaga, final String Alamat, final Double Lati_c, final Double Longi_c){
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
                 mMap = googleMap;
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(-5.397140, 105.266789), 12.0f));
-
-                LatLng ubl = new LatLng(-5.397140, 105.266792);
-                MarkerOptions marker = null;
-                marker = new MarkerOptions()
-                        .position(ubl)
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.teacher));
-                mMap.addMarker(marker);
-                mMap.getUiSettings().setZoomControlsEnabled(true);
-                mMap.getUiSettings().setZoomGesturesEnabled(true);
 
                 Criteria criteria = new Criteria();
                 if ((ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ||
@@ -76,14 +132,41 @@ public class MapsActivity extends FragmentActivity{
                 Location location = locationManager.getLastKnownLocation(locationManager.getBestProvider(criteria, false));
                 if (location!=null){
                     LatLng MyLocation = new LatLng(location.getLatitude(), location.getLongitude());
+
+                    LatLng ubl = new LatLng(Lati_c, Longi_c);
+                    MarkerOptions marker = null;
+                    marker = new MarkerOptions()
+                            .position(ubl)
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.teacher));
+                    mMap.addMarker(marker);
+
+
+                    mMap.getUiSettings().setZoomControlsEnabled(true);
+                    mMap.getUiSettings().setZoomGesturesEnabled(true);
+
+
                     mMap.addMarker(new MarkerOptions().position(MyLocation).title("Posisi Anda").snippet(""+location.getLatitude()));
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,13));
+
                 }else{
                     Toast.makeText(getApplication(), "Lokasi Tidak Di temukan", Toast.LENGTH_SHORT).show();
                 }
 
             }
         });
+    }
+
+
+    double distance(double lat,double lon,double clat,double clon)
+    {
+        double distance;
+        double temp1;
+        double temp2;
+        temp1=(double)((lat-clat)*(lat-clat));
+        temp2=(double)((lon-clon)*(lon-clon));
+        distance=temp1+temp2;
+        Toast.makeText(getApplication(),"Hasil "+distance,Toast.LENGTH_LONG).show();
+        return distance;
     }
 
 
