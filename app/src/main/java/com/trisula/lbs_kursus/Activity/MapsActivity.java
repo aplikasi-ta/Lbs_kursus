@@ -13,6 +13,7 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -138,15 +139,29 @@ public class MapsActivity extends FragmentActivity{
                     marker = new MarkerOptions()
                             .position(ubl)
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.teacher));
-                    mMap.addMarker(marker);
 
+                    double earthRadius = 3958.75; // in miles, change to 6371 for kilometer output
+                    double dLat = Math.toRadians(location.getLatitude()-Lati_c);
+                    double dLng = Math.toRadians(location.getLongitude()-Longi_c);
+                    double sindLat = Math.sin(dLat / 2);
+                    double sindLng = Math.sin(dLng / 2);
+                    double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
+                            * Math.cos(Math.toRadians(Lati_c)) * Math.cos(Math.toRadians(location.getLatitude()));
+                    double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+                    double dist = earthRadius * c;
 
-                    mMap.getUiSettings().setZoomControlsEnabled(true);
-                    mMap.getUiSettings().setZoomGesturesEnabled(true);
+                    DecimalFormat df = new DecimalFormat("#.#");
+                    Double jarak = Double.parseDouble(df.format(dist));
 
-
-                    mMap.addMarker(new MarkerOptions().position(MyLocation).title("Posisi Anda").snippet(""+location.getLatitude()));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,13));
+                    if(jarak >= 2){
+                        Log.d("Jarak ",String.valueOf(jarak));
+                    }else{
+                        mMap.addMarker(marker.title(Nama_lembaga).snippet(Alamat+" - "+jarak));
+                        mMap.getUiSettings().setZoomControlsEnabled(true);
+                        mMap.getUiSettings().setZoomGesturesEnabled(true);
+                        mMap.addMarker(new MarkerOptions().position(MyLocation).title("Posisi Anda").snippet(""+location.getLatitude()));
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,13));
+                    }
 
                 }else{
                     Toast.makeText(getApplication(), "Lokasi Tidak Di temukan", Toast.LENGTH_SHORT).show();
@@ -154,19 +169,6 @@ public class MapsActivity extends FragmentActivity{
 
             }
         });
-    }
-
-
-    double distance(double lat,double lon,double clat,double clon)
-    {
-        double distance;
-        double temp1;
-        double temp2;
-        temp1=(double)((lat-clat)*(lat-clat));
-        temp2=(double)((lon-clon)*(lon-clon));
-        distance=temp1+temp2;
-        Toast.makeText(getApplication(),"Hasil "+distance,Toast.LENGTH_LONG).show();
-        return distance;
     }
 
 
