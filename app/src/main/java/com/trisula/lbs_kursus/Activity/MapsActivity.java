@@ -14,6 +14,7 @@ import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -103,12 +104,13 @@ public class MapsActivity extends FragmentActivity{
 
             for (int i = 0; i < result.length(); i++) {
                 JSONObject jo = result.getJSONObject(i);
+                String id_bimbel = jo.getString("id_bimbel");
                 String nama_lembaga = jo.getString("nama_lembaga");
                 String alamat = jo.getString("alamat");
                 Double lati = jo.getDouble("kor_lati");
                 Double longi = jo.getDouble("kor_longi");
 
-                Location_based_service(nama_lembaga,alamat,lati,longi);
+                Location_based_service(id_bimbel,nama_lembaga,alamat,lati,longi);
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -117,7 +119,7 @@ public class MapsActivity extends FragmentActivity{
     }
 
 
-    void Location_based_service(final String Nama_lembaga, final String Alamat, final Double Lati_c, final Double Longi_c){
+    void Location_based_service(final String Id, final String Nama_lembaga, final String Alamat, final Double Lati_c, final Double Longi_c){
         mapFragment.getMapAsync(new OnMapReadyCallback() {
             @Override
             public void onMapReady(GoogleMap googleMap) {
@@ -156,11 +158,22 @@ public class MapsActivity extends FragmentActivity{
                     if(jarak >= 2){
                         Log.d("Jarak ",String.valueOf(jarak));
                     }else{
-                        mMap.addMarker(marker.title(Nama_lembaga).snippet(Alamat+" - "+jarak));
+                        mMap.addMarker(marker.title(""+Id).snippet(Nama_lembaga));
                         mMap.getUiSettings().setZoomControlsEnabled(true);
                         mMap.getUiSettings().setZoomGesturesEnabled(true);
                         mMap.addMarker(new MarkerOptions().position(MyLocation).title("Posisi Anda").snippet(""+location.getLatitude()));
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(MyLocation,13));
+
+
+                        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+                            @Override
+                            public void onInfoWindowClick(Marker marker) {
+                                Intent intent = new Intent(MapsActivity.this, DetailBimbelActivity.class);
+                                intent.putExtra("id_bimbel", marker.getTitle());
+                                finish();
+                                startActivity(intent);
+                            }
+                        });
                     }
 
                 }else{

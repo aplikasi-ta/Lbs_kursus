@@ -7,4 +7,5 @@ public class SharedVariabel {
     public static String KONTAK;
     public static String LATITUDE;
     public static String LONGITUDE;
+    public static String ID_USER_PERMANENT;
 }

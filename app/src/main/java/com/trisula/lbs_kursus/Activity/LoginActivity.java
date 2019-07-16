@@ -49,7 +49,7 @@ import java.util.List;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 Button btnReg,btnLogin;
-EditText etEmail, etPass;
+public static EditText etEmail, etPass;
     NiftyDialogBuilder dialogs;
     public static final String USER_NAME = "USERNAME";
     private Location mLastLocation;
@@ -277,7 +277,7 @@ EditText etEmail, etPass;
                 String s = result.trim();
                 loadingDialog.dismiss();
                 if(s.equalsIgnoreCase("success")){
-                    Intent intent = new Intent(LoginActivity.this, MapsActivity.class);
+                    Intent intent = new Intent(LoginActivity.this, BerandaAcivity.class);
                     intent.putExtra(SharedVariabel.AUTH_USER, etEmail.getText().toString().trim());
                     finish();
                     startActivity(intent);
