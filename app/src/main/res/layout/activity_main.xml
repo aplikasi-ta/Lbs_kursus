@@ -25,7 +25,7 @@
         android:layout_below="@+id/imageView"
         android:layout_marginTop="20dp"
         android:fontFamily="sans-serif-condensed"
-        android:text="Aplikasi Kursus"
+        android:text="Aplikasi Tempat Bimbel"
         android:textAlignment="center"
         android:textColor="@color/colorPrimary"
         android:textSize="30sp"

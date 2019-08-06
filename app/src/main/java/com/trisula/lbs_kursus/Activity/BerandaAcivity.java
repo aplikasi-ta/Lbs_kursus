@@ -16,7 +16,7 @@ import com.gitonway.lee.niftymodaldialogeffects.lib.NiftyDialogBuilder;
 import com.trisula.lbs_kursus.R;
 
 public class BerandaAcivity extends AppCompatActivity {
-Button btnMenu1, btnMenu2,btnMenu3,btnMenu4;
+Button btnMenu1, btnMenu2,btnMenu3,btnMenu4,btnMenu5;
 NiftyDialogBuilder dialogs;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,39 +47,41 @@ NiftyDialogBuilder dialogs;
         btnMenu3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialogs
-                        .withTitle("Tentang Aplikasi")
-                        .withMessage("Aplikasi LBS merupakan aplikasi pencarian tempat bimbel terdekat")
-                        .withDialogColor("#009faf")
-                        .withButton2Text("Ok")
-                        .withEffect(Effectstype.Fall);
-                dialogs.setButton2Click(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        dialogs.dismiss();
-                    }
-                });
+               Intent intent = new Intent(BerandaAcivity.this, BantuanActivity.class);
+               startActivity(intent);
             }
         });
 
         btnMenu4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                dialogs
-                        .withTitle("Keluar Aplikasi")
-                        .withMessage("Anda akan keluar aplikasi")
-                        .withDialogColor("#009faf")
-                        .withButton2Text("Ok")
-                        .withEffect(Effectstype.Fall);
-                dialogs.setButton2Click(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        BerandaAcivity.super.onBackPressed();
-                        dialogs.dismiss();
-                    }
-                });
-            }
-        });
+                AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(
+                        BerandaAcivity.this);
 
+                alertDialogBuilder.setTitle("Keluar dari aplikasi ?");
+                alertDialogBuilder
+                        .setMessage("Klik Ya untuk keluar!")
+                        .setIcon(R.mipmap.ic_launcher)
+                        .setCancelable(false)
+                        .setPositiveButton("Ya",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog,int id) {
+                                Intent intent = new Intent(BerandaAcivity.this, LoginActivity.class);
+                                startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("Tidak",new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.cancel();
+                            }
+                        });
+
+                // membuat alert dialog dari builder
+                AlertDialog alertDialog = alertDialogBuilder.create();
+
+                // menampilkan alert dialog
+                alertDialog.show();
+            }
+
+        });
     }
 }

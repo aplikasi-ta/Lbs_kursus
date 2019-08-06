@@ -192,6 +192,7 @@
                                 android:id="@+id/txc2"
                                 android:padding="2dp"
                                 android:text=""></TextView>
+
                         </TableRow>
 
                         <TableRow
